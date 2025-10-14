@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Trade Go</string>
+    <string name="loading_market_data">Memuat data pasar…</string>
+    <string name="nav_home">Beranda</string>
+    <string name="nav_watchlist">Daftar Pantauan</string>
+    <string name="empty_watchlist">Belum ada aset di daftar pantauan</string>
+</resources>

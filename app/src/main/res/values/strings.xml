@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">trader-go</string>
+    <string name="app_name">Trade Go</string>
+    <string name="loading_market_data">Loading market data…</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_watchlist">Watchlist</string>
+    <string name="empty_watchlist">No watchlist items yet</string>
 </resources>
