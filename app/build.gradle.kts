@@ -114,6 +114,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.junit)
+    testImplementation(kotlin("test"))
 }
 
 
