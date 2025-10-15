@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f390b05221eb5432ffe1133fae2c7a8a",
+    "identityHash": "2de36e46fd34abee6107920cf253997a",
     "entities": [
       {
         "tableName": "assets",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `symbol` TEXT NOT NULL, `name` TEXT NOT NULL, `priceUsd` REAL NOT NULL, `changePercent24Hr` REAL NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `symbol` TEXT NOT NULL, `name` TEXT NOT NULL, `priceUsd` REAL NOT NULL, `changePercent24Hr` REAL NOT NULL, `rank` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -36,6 +36,12 @@
             "fieldPath": "changePercent24Hr",
             "columnName": "changePercent24Hr",
             "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rank",
+            "columnName": "rank",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -73,7 +79,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f390b05221eb5432ffe1133fae2c7a8a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2de36e46fd34abee6107920cf253997a')"
     ]
   }
 }

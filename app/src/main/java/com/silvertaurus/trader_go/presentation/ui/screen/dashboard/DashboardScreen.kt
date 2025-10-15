@@ -17,19 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.silvertaurus.trader_go.R
 import com.silvertaurus.trader_go.presentation.ui.screen.home.HomeScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.watchlist.WatchlistScreen
-import com.silvertaurus.trader_go.presentation.viewmodel.AssetListViewModel
-import com.silvertaurus.trader_go.presentation.viewmodel.WatchlistViewModel
 
 @Composable
 fun DashboardScreen(
-    navController: NavHostController,
-    assetListViewModel: AssetListViewModel = hiltViewModel(),
-    watchlistViewModel: WatchlistViewModel = hiltViewModel()
+    navController: NavHostController
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
@@ -54,15 +49,12 @@ fun DashboardScreen(
         when (selectedTab) {
             0 -> HomeScreen(
                 navController,
-                Modifier.padding(padding),
-                assetListViewModel,
-                watchlistViewModel
+                Modifier.padding(padding)
             )
 
             1 -> WatchlistScreen(
                 navController,
-                Modifier.padding(padding),
-                watchlistViewModel
+                Modifier.padding(padding)
             )
         }
     }

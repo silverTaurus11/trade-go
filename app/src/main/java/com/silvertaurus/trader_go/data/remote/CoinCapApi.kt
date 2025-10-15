@@ -9,6 +9,7 @@ import retrofit2.http.Query
 interface CoinCapApi {
     @GET("assets")
     suspend fun getAssets(
+        @Query("ids") ids: String? = null,
         @Query("limit") limit: Int = 100,
         @Query("offset") offset: Int = 0
     ): AssetsResponse

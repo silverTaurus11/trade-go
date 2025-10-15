@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.room.runtime)
     kapt(libs.room.compiler)
     implementation(libs.room.ktx)
+    implementation(libs.androidx.room.paging)
 
     // Paging
     implementation(libs.paging.runtime)
@@ -104,6 +105,9 @@ dependencies {
     //Chart
     implementation(libs.mpandroidchart)
 
+    //Chucker
+    debugImplementation(libs.library)
+    releaseImplementation(libs.library.no.op)
 
     // Testing
     testImplementation(libs.kotlinx.coroutines.test)

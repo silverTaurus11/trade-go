@@ -58,6 +58,7 @@ class DetailViewModel @Inject constructor(
                 val candles = getAssetHistoryUseCase(assetId, start, end, interval)
                 baseCandles = candles
                 withContext(dispatcher.main) {
+                    _livePrice.value = candles.last().close
                     _uiState.value = UiState.Success(candles)
                 }
                 startObservingPrices(assetId)

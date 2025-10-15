@@ -17,7 +17,4 @@ interface WatchlistDao {
 
     @Query("SELECT assetId FROM watchlist")
     fun watchlistFlow(): Flow<List<String>>
-
-    @Query("SELECT EXISTS(SELECT 1 FROM watchlist WHERE assetId = :id)")
-    suspend fun isInWatchlist(id: String): Boolean
 }

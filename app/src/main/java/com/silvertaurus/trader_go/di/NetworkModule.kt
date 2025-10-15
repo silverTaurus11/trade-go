@@ -2,6 +2,9 @@ package com.silvertaurus.trader_go.di
 
 import android.content.Context
 import androidx.room.Room
+import com.chuckerteam.chucker.api.ChuckerCollector
+import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.chuckerteam.chucker.api.RetentionManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.Strictness
@@ -38,6 +41,23 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideChuckerInterceptor(@ApplicationContext context: Context): ChuckerInterceptor {
+        val collector = ChuckerCollector(
+            context = context,
+            showNotification = true,
+            retentionPeriod = RetentionManager.Period.ONE_HOUR
+        )
+
+        return ChuckerInterceptor.Builder(context)
+            .collector(collector)
+            .maxContentLength(250_000L)
+            .redactHeaders(emptySet())
+            .alwaysReadResponseBody(true)
+            .build()
+    }
+
+    @Provides
+    @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
         val interceptor = HttpLoggingInterceptor { message ->
             android.util.Log.d("HTTPS", message)
@@ -56,8 +76,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttp(authInterceptor: AuthInterceptor, httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttp(
+        authInterceptor: AuthInterceptor,
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        chuckerInterceptor: ChuckerInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(chuckerInterceptor)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(authInterceptor)
             .build()
@@ -87,7 +112,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideRemoteDataSource(api: CoinCapApi, ws: CoinCapWebSocketManager): RemoteAssetDataSource =
+    fun provideRemoteDataSource(
+        api: CoinCapApi,
+        ws: CoinCapWebSocketManager
+    ): RemoteAssetDataSource =
         RemoteAssetDataSource(api, ws)
 
     @Provides

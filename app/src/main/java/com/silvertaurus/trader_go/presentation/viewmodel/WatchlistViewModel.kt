@@ -1,17 +1,22 @@
 package com.silvertaurus.trader_go.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.silvertaurus.trader_go.domain.model.Asset
 import com.silvertaurus.trader_go.domain.usecase.interfaces.IObservePriceUpdatesUseCase
 import com.silvertaurus.trader_go.domain.usecase.interfaces.IObserveWatchlistUseCase
 import com.silvertaurus.trader_go.domain.usecase.interfaces.IToggleWatchlistUseCase
 import com.silvertaurus.trader_go.domain.utils.DispatcherProvider
-import com.silvertaurus.trader_go.presentation.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,52 +24,59 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WatchlistViewModel @Inject constructor(
-    private val observeWatchlistUseCase: IObserveWatchlistUseCase,
+    private val observeWatchlistPagingUseCase: IObserveWatchlistUseCase,
     private val toggleWatchlistUseCase: IToggleWatchlistUseCase,
     private val observePriceUpdatesUseCase: IObservePriceUpdatesUseCase,
     private val dispatcher: DispatcherProvider
 ) : ViewModel() {
-    private val _watchlistIds = MutableStateFlow<Set<String>>(emptySet())
-    val watchlistIds: StateFlow<Set<String>> = _watchlistIds
-    private val _uiState = MutableStateFlow<UiState<List<Asset>>>(UiState.Loading)
-    val uiState = _uiState.asStateFlow()
+
+    private val _watchlistIds = MutableStateFlow<List<String>>(emptyList())
+    val watchlistIds: StateFlow<List<String>> = _watchlistIds
+
+    private val _watchlistFlow = MutableStateFlow<PagingData<Asset>>(PagingData.empty())
+    val watchlistFlow = _watchlistFlow.asStateFlow()
 
     init {
-        getWatchList()
+        loadWatchlistIds()
+        loadWatchlist()
+        startObservingPrices()
     }
 
-    fun toggleWatch(assetId: String) =
-        viewModelScope.launch(dispatcher.io) {
-            toggleWatchlistUseCase(assetId)
-            _watchlistIds.update { ids ->
-                if (assetId in ids) ids - assetId else ids + assetId
+    fun toggleWatch(assetId: String) = viewModelScope.launch(dispatcher.io) {
+        toggleWatchlistUseCase(assetId)
+        loadWatchlistIds()
+        loadWatchlist()
+    }
+
+    private fun loadWatchlist() = viewModelScope.launch(dispatcher.io) {
+        observeWatchlistPagingUseCase()
+            .cachedIn(viewModelScope)
+            .collectLatest { pagingData ->
+                withContext(dispatcher.main) {
+                    _watchlistFlow.value = pagingData
+                }
             }
-        }
-
-    fun onRetry() {
-        getWatchList()
     }
 
-    private fun getWatchList() = viewModelScope.launch(dispatcher.io) {
-        observeWatchlistUseCase().collect { list ->
+    private fun loadWatchlistIds() = viewModelScope.launch(dispatcher.io) {
+        observeWatchlistPagingUseCase.getWatchlistIds().collectLatest { ids ->
             withContext(dispatcher.main) {
-                _uiState.value = UiState.Success(list)
-                _watchlistIds.value = list.map { it.id }.toSet()
+                _watchlistIds.value = ids
             }
-            startObservingPrices()
         }
     }
 
     private fun startObservingPrices() = viewModelScope.launch(dispatcher.io) {
         observePriceUpdatesUseCase().collect { prices ->
-            val current = (_uiState.value as? UiState.Success)?.data ?: return@collect
-            val updated = current.map { asset ->
-                prices[asset.id]?.let { asset.copy(priceUsd = it) } ?: asset
-            }
-            withContext(dispatcher.main) {
-                _uiState.value = UiState.Success(updated)
+            _watchlistFlow.update { current ->
+                current.map { asset ->
+                    prices[asset.id]?.let { updatedPrice ->
+                        asset.copy(priceUsd = updatedPrice)
+                    } ?: asset
+                }
             }
         }
     }
 }
+
 
