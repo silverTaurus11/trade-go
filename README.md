@@ -18,6 +18,14 @@ Built with **Jetpack Compose**, **Hilt**, **Room**, and **Paging 3**, it offers 
 
 ---
 
+## ✨ Preview
+<img width="379" height="783" alt="image" src="https://github.com/user-attachments/assets/f581807c-e175-45ed-a58a-13611c2b0dfa" />
+<img width="369" height="814" alt="Screenshot 2025-10-16 at 11 57 49" src="https://github.com/user-attachments/assets/cc2f3837-6386-4ff6-b5e1-d8ea733fa77d" />
+<img width="369" height="814" alt="Screenshot 2025-10-16 at 11 57 57" src="https://github.com/user-attachments/assets/67a49629-ee00-444f-8be5-e740a96c99a3" />
+<img width="366" height="810" alt="Screenshot 2025-10-16 at 11 58 03" src="https://github.com/user-attachments/assets/ff1da9d6-6ebf-4f59-b2d3-c7a966d0ae11" />
+<img width="367" height="812" alt="Screenshot 2025-10-16 at 11 58 36" src="https://github.com/user-attachments/assets/c382662c-dfa1-498d-b316-531a252c9970" />
+---
+
 ## 🧱 Tech Stack
 
 | Layer         | Libraries / Tools                               |
