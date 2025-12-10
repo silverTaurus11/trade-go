@@ -1,4 +1,4 @@
-# 📊 Trader Go — Crypto Asset Tracker
+# 📊 Trade Go — Crypto Asset Tracker
 
 **Trader Go** is a modern Android app for tracking real-time cryptocurrency prices and performance.
 Built with **Jetpack Compose**, **Hilt**, **Room**, and **Paging 3**, it offers a dynamic watchlist, historical charts, and smooth offline caching powered by the **CoinCap API**.
