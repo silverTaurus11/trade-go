@@ -10,9 +10,7 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun ToggleWatchList(isWatched: Boolean, onClick: () -> Unit) {
-    IconButton(onClick = {
-        onClick()
-    }) {
+    IconButton(onClick = onClick) {
         Icon(
             imageVector = if (isWatched) Icons.Default.Star else Icons.Default.StarBorder,
             contentDescription = "Toggle Watchlist",

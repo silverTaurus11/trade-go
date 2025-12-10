@@ -1,6 +1,8 @@
 package com.silvertaurus.trader_go.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -9,6 +11,7 @@ import androidx.navigation.navArgument
 import com.silvertaurus.trader_go.presentation.ui.screen.dashboard.DashboardScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.detail.DetailScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.splash.SplashScreen
+import com.silvertaurus.trader_go.presentation.viewmodel.WatchlistViewModel
 
 @Composable
 fun CryptoNavGraph(navController: NavHostController) {
@@ -33,7 +36,12 @@ fun CryptoNavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("assetId") { type = NavType.StringType })
         ) { backStackEntry ->
             val assetId = backStackEntry.arguments?.getString("assetId") ?: ""
-            DetailScreen(assetId = assetId, navController = navController)
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Dashboard.route)
+            }
+            val watchlistViewModel: WatchlistViewModel = hiltViewModel(parentEntry)
+
+            DetailScreen(assetId = assetId, navController = navController, watchlistViewModel = watchlistViewModel)
         }
     }
 }

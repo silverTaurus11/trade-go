@@ -6,17 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.silvertaurus.trader_go.domain.model.Asset
 import com.silvertaurus.trader_go.presentation.ui.theme.GreenUp
@@ -27,11 +22,21 @@ import com.silvertaurus.trader_go.presentation.ui.theme.RedDown
 fun AssetItem(
     asset: Asset,
     onClick: () -> Unit,
-    onWatchToggle: (Asset) -> Unit,
+    onWatchToggle: (String) -> Unit,
     isWatched: Boolean
 ) {
     val priceColor = if (asset.changePercent24Hr >= 0) GreenUp else RedDown
-    val changeText = "${"%.2f".format(asset.changePercent24Hr)}%"
+    val changeText = remember(asset.changePercent24Hr) {
+        "${"%.2f".format(asset.changePercent24Hr)}%"
+    }
+
+    val priceText = remember(asset.priceUsd) {
+        "$${"%.2f".format(asset.priceUsd)}"
+    }
+
+    val onWatchToggle = remember(asset) {
+        { onWatchToggle(asset.id) }
+    }
 
     Row(
         Modifier
@@ -50,12 +55,12 @@ fun AssetItem(
         ) {
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "$${"%.2f".format(asset.priceUsd)}",
+                    text = priceText,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(changeText, color = priceColor, style = MaterialTheme.typography.bodyMedium)
             }
-            ToggleWatchList(isWatched) { onWatchToggle(asset) }
+            ToggleWatchList(isWatched, onClick = onWatchToggle)
         }
     }
 }

@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -34,7 +34,7 @@ fun WatchlistScreen(
     viewModel: WatchlistViewModel = hiltViewModel()
 ) {
     val watchlist = viewModel.watchlistFlow.collectAsLazyPagingItems()
-    val watchlistIds by viewModel.watchlistIds.collectAsState()
+    val watchlistIds by viewModel.watchlistIds.collectAsStateWithLifecycle()
 
     when (watchlist.loadState.refresh) {
         is LoadState.Loading -> {
@@ -62,22 +62,23 @@ fun WatchlistScreen(
                     ) { index ->
                         val asset = watchlist[index]
                         if (asset != null) {
+                            val isWatched = asset.id in watchlistIds
+
                             AssetItem(
                                 asset = asset,
                                 onClick = {
                                     navController.navigate(Screen.Detail.createRoute(asset.id))
                                 },
-                                onWatchToggle = {
-                                    viewModel.toggleWatch(asset.id)
+                                onWatchToggle = { id ->
+                                    viewModel.toggleWatch(id)
                                 },
-                                isWatched = asset.id in watchlistIds
+                                isWatched = isWatched
                             )
                         } else {
                             AssetPlaceholderRow()
                         }
                     }
 
-                    // Append pagination states
                     when (watchlist.loadState.append) {
                         is LoadState.Loading -> {
                             item {

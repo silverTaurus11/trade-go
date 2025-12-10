@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -32,7 +32,7 @@ fun HomeScreen(
     watchlistViewModel: WatchlistViewModel = hiltViewModel()
 ) {
     val assets = viewModel.assetsFlow.collectAsLazyPagingItems()
-    val watchlistIds by watchlistViewModel.watchlistIds.collectAsState()
+    val watchlistIds by watchlistViewModel.watchlistIds.collectAsStateWithLifecycle()
 
     when (assets.loadState.refresh) {
         is LoadState.Loading -> {
@@ -65,15 +65,14 @@ fun HomeScreen(
                             onClick = {
                                 navController.navigate(Screen.Detail.createRoute(asset.id))
                             },
-                            onWatchToggle = {
-                                watchlistViewModel.toggleWatch(asset.id)
+                            onWatchToggle = { id ->
+                                watchlistViewModel.toggleWatch(id)
                             },
                             isWatched = isWatched
                         )
                     }
                 }
 
-                // 🔁 Paging append state
                 when (assets.loadState.append) {
                     is LoadState.Loading -> {
                         item {

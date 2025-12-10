@@ -36,7 +36,6 @@ fun TimeRangeSelector(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         CandleInterval.entries.forEach { interval ->
-            val isSelected = interval == selected
 
             val bg by transition.animateColor(label = "bgColor") {
                 if (it == interval) Color(0xFF00E676) else Color.Transparent

@@ -23,8 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +32,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.silvertaurus.trader_go.presentation.navigation.Screen
 import com.silvertaurus.trader_go.presentation.state.UiState
 import com.silvertaurus.trader_go.presentation.ui.component.ChartViewLine
 import com.silvertaurus.trader_go.presentation.ui.component.ErrorView
@@ -42,20 +44,28 @@ import com.silvertaurus.trader_go.presentation.ui.component.ToggleWatchList
 import com.silvertaurus.trader_go.presentation.viewmodel.DetailViewModel
 import com.silvertaurus.trader_go.presentation.viewmodel.WatchlistViewModel
 
-@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     assetId: String,
     navController: NavHostController,
-    viewModel: DetailViewModel = hiltViewModel(),
-    watchlistViewModel: WatchlistViewModel = hiltViewModel()
+    watchlistViewModel: WatchlistViewModel,
+    viewModel: DetailViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val watchlistIds by watchlistViewModel.watchlistIds.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val watchlistIds by watchlistViewModel.watchlistIds.collectAsStateWithLifecycle()
+    val livePrice by viewModel.livePrice.collectAsStateWithLifecycle()
+    val selectedInterval by viewModel.selectedInterval.collectAsStateWithLifecycle()
+
     val isWatched = assetId in watchlistIds
-    val livePrice by viewModel.livePrice.collectAsState()
-    val selectedInterval by viewModel.selectedInterval.collectAsState()
+
+    val priceText = remember(livePrice) {
+        livePrice?.let { "$${"%.2f".format(it)}" } ?: "-"
+    }
+
+    val onToggleWatchList = remember(assetId) {
+        { watchlistViewModel.toggleWatch(assetId) }
+    }
 
     LaunchedEffect(assetId) {
         viewModel.loadWithInterval(assetId)
@@ -71,9 +81,7 @@ fun DetailScreen(
                     }
                 },
                 actions = {
-                    ToggleWatchList(isWatched) {
-                        watchlistViewModel.toggleWatch(assetId)
-                    }
+                    ToggleWatchList(isWatched, onClick = { onToggleWatchList() })
                 },
             )
         }
@@ -87,7 +95,7 @@ fun DetailScreen(
         ) {
             livePrice?.let {
                 Text(
-                    text = "$${String.format("%.2f", it)}",
+                    text = priceText,
                     color = Color(0xFF00E676),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
@@ -116,8 +124,12 @@ fun DetailScreen(
                 when (ui) {
                     is UiState.Loading -> LoadingView()
                     is UiState.Success -> {
+                        val prices = remember(ui.data) {
+                            ui.data.map { it.close }
+                        }
+
                         ChartViewLine(
-                            prices = ui.data.map { it.close },
+                            prices = prices,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)

@@ -9,6 +9,7 @@ import com.silvertaurus.trader_go.domain.usecase.interfaces.IObservePriceUpdates
 import com.silvertaurus.trader_go.domain.utils.DispatcherProvider
 import com.silvertaurus.trader_go.presentation.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,19 +35,20 @@ class DetailViewModel @Inject constructor(
 
     private var baseCandles = listOf<Candle>()
 
+    private var priceJob: Job? = null
+
     fun setInterval(interval: CandleInterval, assetId: String) {
         if (interval == _selectedInterval.value) return
         _selectedInterval.value = interval
-
         loadWithInterval(assetId)
     }
 
     fun loadWithInterval(assetId: String){
         val now = System.currentTimeMillis()
         val past = now - when (_selectedInterval.value) {
-            CandleInterval.ONE_MINUTE -> 60 * 60 * 1000L      // 1 jam
-            CandleInterval.FIFTEEN_MINUTES -> 6 * 60 * 60 * 1000L // 6 jam
-            CandleInterval.ONE_HOUR -> 24 * 60 * 60 * 1000L  // 24 jam
+            CandleInterval.ONE_MINUTE -> 60 * 60 * 1000L
+            CandleInterval.FIFTEEN_MINUTES -> 6 * 60 * 60 * 1000L
+            CandleInterval.ONE_HOUR -> 24 * 60 * 60 * 1000L
         }
         load(assetId, past, now, _selectedInterval.value.apiParam)
     }
@@ -70,27 +72,36 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    private fun startObservingPrices(assetId: String) = viewModelScope.launch(dispatcher.io) {
-        observePriceUpdatesUseCase().collect { prices ->
-            prices[assetId]?.also { price ->
-                _livePrice.value = price
+    private fun startObservingPrices(assetId: String) {
+        if (priceJob?.isActive == true) return
 
-                val current = (_uiState.value as? UiState.Success)?.data ?: baseCandles
-                val updated = current.toMutableList()
+        priceJob = viewModelScope.launch(dispatcher.io) {
+            observePriceUpdatesUseCase().collect { prices ->
+                prices[assetId]?.also { price ->
+                    _livePrice.value = price
 
-                if (updated.isNotEmpty()) {
-                    val last = updated.last()
-                    val newCandle = last.copy(
-                        close = prices[assetId] ?: 0.0,
-                        high = maxOf(last.high, price),
-                        low = minOf(last.low, price)
-                    )
-                    updated[updated.lastIndex] = newCandle
-                    withContext(dispatcher.main) {
-                        _uiState.value = UiState.Success(updated)
+                    val current = (_uiState.value as? UiState.Success)?.data ?: baseCandles
+                    val updated = current.toMutableList()
+
+                    if (updated.isNotEmpty()) {
+                        val last = updated.last()
+                        val newCandle = last.copy(
+                            close = prices[assetId] ?: 0.0,
+                            high = maxOf(last.high, price),
+                            low = minOf(last.low, price)
+                        )
+                        updated[updated.lastIndex] = newCandle
+                        withContext(dispatcher.main) {
+                            _uiState.value = UiState.Success(updated)
+                        }
                     }
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        priceJob?.cancel()
+        super.onCleared()
     }
 }
