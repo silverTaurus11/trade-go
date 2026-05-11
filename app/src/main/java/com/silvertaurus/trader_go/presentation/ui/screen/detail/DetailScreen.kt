@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.silvertaurus.trader_go.presentation.navigation.Screen
 import com.silvertaurus.trader_go.presentation.state.UiState
+import com.silvertaurus.trader_go.presentation.ui.component.ChartView
 import com.silvertaurus.trader_go.presentation.ui.component.ChartViewBar
 import com.silvertaurus.trader_go.presentation.ui.component.ErrorView
 import com.silvertaurus.trader_go.presentation.ui.component.LoadingView
@@ -125,8 +126,9 @@ fun DetailScreen(
                 when (ui) {
                     is UiState.Loading -> LoadingView()
                     is UiState.Success -> {
-                        ChartViewBar(
+                        ChartView(
                             candles = ui.data,
+                            interval = selectedInterval,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)

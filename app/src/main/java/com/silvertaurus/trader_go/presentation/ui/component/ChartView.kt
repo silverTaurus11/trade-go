@@ -8,17 +8,46 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.mikephil.charting.charts.CandleStickChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.CandleData
 import com.github.mikephil.charting.data.CandleDataSet
 import com.github.mikephil.charting.data.CandleEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.silvertaurus.trader_go.domain.model.Candle
+import com.silvertaurus.trader_go.domain.model.CandleInterval
 import com.silvertaurus.trader_go.presentation.ui.theme.GreenUp
 import com.silvertaurus.trader_go.presentation.ui.theme.NeutralGray
 import com.silvertaurus.trader_go.presentation.ui.theme.RedDown
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+private class TimeAxisFormatter(
+    private val candles: List<Candle>,
+    private val interval: CandleInterval
+) : ValueFormatter() {
+    private val fmt = SimpleDateFormat(
+        when (interval) {
+            CandleInterval.ONE_MINUTE     -> "HH:mm"
+            CandleInterval.FIFTEEN_MINUTES -> "HH:mm"
+            CandleInterval.ONE_HOUR       -> "HH:mm"
+        },
+        Locale.getDefault()
+    )
+
+    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+        val index = value.toInt()
+        return if (index in candles.indices) fmt.format(Date(candles[index].time)) else ""
+    }
+}
 
 @Composable
-fun ChartView(candles: List<Candle>, modifier: Modifier = Modifier) {
+fun ChartView(
+    candles: List<Candle>,
+    interval: CandleInterval = CandleInterval.ONE_HOUR,
+    modifier: Modifier = Modifier
+) {
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { context ->
@@ -32,6 +61,9 @@ fun ChartView(candles: List<Candle>, modifier: Modifier = Modifier) {
                     textColor = Color.White.toArgb()
                     setDrawGridLines(false)
                     position = XAxis.XAxisPosition.BOTTOM
+                    labelRotationAngle = -45f
+                    setLabelCount(5, false)
+                    granularity = 1f
                 }
 
                 axisLeft.apply {
@@ -59,26 +91,18 @@ fun ChartView(candles: List<Candle>, modifier: Modifier = Modifier) {
             }
 
             val set = CandleDataSet(entries, "").apply {
-                // ✅ Atur warna candlestick
                 decreasingColor = RedDown.toArgb()
                 increasingColor = GreenUp.toArgb()
                 neutralColor = NeutralGray.toArgb()
-
-                // ✅ Gunakan body solid, bukan garis tipis
                 decreasingPaintStyle = Paint.Style.FILL
                 increasingPaintStyle = Paint.Style.FILL
-
-                // ✅ Tampilkan shadow warna sesuai candle
                 shadowColorSameAsCandle = true
-
-                // ✅ Hapus nilai di atas candle
                 setDrawValues(false)
-
-                // ✅ Sedikit tebal agar terlihat
                 barSpace = 0.2f
                 shadowWidth = 1.5f
             }
 
+            chart.xAxis.valueFormatter = TimeAxisFormatter(candles, interval)
             chart.data = CandleData(set)
             chart.invalidate()
         }
