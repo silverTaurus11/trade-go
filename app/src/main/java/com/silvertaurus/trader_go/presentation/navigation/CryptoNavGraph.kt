@@ -7,15 +7,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.silvertaurus.trader_go.presentation.ui.screen.dashboard.DashboardScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.detail.DetailScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.splash.SplashScreen
+import com.silvertaurus.trader_go.presentation.viewmodel.AssetListViewModel
 import com.silvertaurus.trader_go.presentation.viewmodel.WatchlistViewModel
 
 @Composable
 fun CryptoNavGraph(navController: NavHostController) {
     NavHost(
+        route = Graph.Main.name,
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
@@ -27,8 +31,13 @@ fun CryptoNavGraph(navController: NavHostController) {
             })
         }
 
-        composable(Screen.Dashboard.route) {
-            DashboardScreen(navController)
+        composable(Screen.Dashboard.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Graph.Main.name)
+            }
+            val assetsListViewModel: AssetListViewModel = hiltViewModel(parentEntry)
+            val watchlistViewModel: WatchlistViewModel = hiltViewModel(parentEntry)
+            DashboardScreen(navController, assetsListViewModel, watchlistViewModel)
         }
 
         composable(
@@ -37,11 +46,15 @@ fun CryptoNavGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val assetId = backStackEntry.arguments?.getString("assetId") ?: ""
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.Dashboard.route)
+                navController.getBackStackEntry(Graph.Main.name)
             }
             val watchlistViewModel: WatchlistViewModel = hiltViewModel(parentEntry)
 
-            DetailScreen(assetId = assetId, navController = navController, watchlistViewModel = watchlistViewModel)
+            DetailScreen(
+                assetId = assetId,
+                navController = navController,
+                watchlistViewModel = watchlistViewModel
+            )
         }
     }
 }

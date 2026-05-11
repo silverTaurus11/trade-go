@@ -37,9 +37,9 @@ fun WatchlistScreen(
     val watchlistIds by viewModel.watchlistIds.collectAsStateWithLifecycle()
 
     when (watchlist.loadState.refresh) {
-        is LoadState.Loading -> {
+        /*is LoadState.Loading -> {
             LoadingView()
-        }
+        }*/
 
         is LoadState.Error -> {
             val e = watchlist.loadState.refresh as LoadState.Error

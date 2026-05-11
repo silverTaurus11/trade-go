@@ -7,3 +7,7 @@ sealed class Screen(val route: String) {
         fun createRoute(assetId: String) = "detail/$assetId"
     }
 }
+
+sealed class Graph(val name: String) {
+    object Main : Graph("main_graph")
+}

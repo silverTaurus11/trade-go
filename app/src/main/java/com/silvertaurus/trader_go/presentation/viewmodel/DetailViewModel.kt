@@ -10,6 +10,7 @@ import com.silvertaurus.trader_go.domain.utils.DispatcherProvider
 import com.silvertaurus.trader_go.presentation.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,11 +58,13 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch(dispatcher.io) {
             _uiState.value = UiState.Loading
             try {
-                val candles = getAssetHistoryUseCase(assetId, start, end, interval)
-                baseCandles = candles
+                val candles = async {
+                    getAssetHistoryUseCase(assetId, start, end, interval)
+                }
+                baseCandles = candles.await()
                 withContext(dispatcher.main) {
-                    _livePrice.value = candles.last().close
-                    _uiState.value = UiState.Success(candles)
+                    _livePrice.value = baseCandles.last().close
+                    _uiState.value = UiState.Success(baseCandles)
                 }
                 startObservingPrices(assetId)
             } catch (e: Exception) {

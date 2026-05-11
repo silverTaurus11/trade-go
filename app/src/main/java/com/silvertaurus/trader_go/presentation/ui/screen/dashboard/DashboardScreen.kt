@@ -17,16 +17,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.silvertaurus.trader_go.R
 import com.silvertaurus.trader_go.presentation.ui.screen.home.HomeScreen
 import com.silvertaurus.trader_go.presentation.ui.screen.watchlist.WatchlistScreen
+import com.silvertaurus.trader_go.presentation.viewmodel.AssetListViewModel
+import com.silvertaurus.trader_go.presentation.viewmodel.WatchlistViewModel
 
 enum class DashboardTab { HOME, WATCHLIST }
 
 @Composable
 fun DashboardScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: AssetListViewModel,
+    watchlistViewModel: WatchlistViewModel
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(DashboardTab.HOME) }
 
@@ -51,12 +56,15 @@ fun DashboardScreen(
         when (selectedTab) {
             DashboardTab.HOME -> HomeScreen(
                 navController,
-                Modifier.padding(padding)
+                Modifier.padding(padding),
+                viewModel,
+                watchlistViewModel
             )
 
             DashboardTab.WATCHLIST -> WatchlistScreen(
                 navController,
-                Modifier.padding(padding)
+                Modifier.padding(padding),
+                watchlistViewModel
             )
         }
     }
