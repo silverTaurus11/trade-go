@@ -26,9 +26,15 @@ class RemoteAssetDataSource @Inject constructor(
         interval: String
     ): List<Candle> {
         val res = api.getAssetHistory(id, interval, start, end)
+        var previousPrice = 0.0
         return res.data.mapNotNull { dto ->
             val price = dto.priceUsd?.toDoubleOrNull() ?: return@mapNotNull null
-            Candle(dto.time, price, price, price, price)
+            if (previousPrice == 0.0) previousPrice = price
+            val openPrice = previousPrice                                    // simpan open sebelum diupdate
+            val highPrice = if (price > previousPrice) price else previousPrice
+            val lowPrice = if (price < previousPrice) price else previousPrice
+            previousPrice = price                                            // update untuk iterasi berikutnya
+            Candle(dto.time, openPrice, highPrice, lowPrice, price)
         }
     }
 
