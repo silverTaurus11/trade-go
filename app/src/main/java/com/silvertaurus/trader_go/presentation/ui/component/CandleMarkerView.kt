@@ -1,5 +1,6 @@
 package com.silvertaurus.trader_go.presentation.ui.component
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.widget.TextView
@@ -10,7 +11,9 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import com.silvertaurus.trader_go.R
 import com.silvertaurus.trader_go.domain.model.Candle
+import com.silvertaurus.trader_go.domain.utils.PriceHelper
 
+@SuppressLint("ViewConstructor")
 class CandleMarkerView(
     context: Context,
     bgColor: Int,
@@ -34,6 +37,7 @@ class CandleMarkerView(
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
         val candleEntry = e as? CandleEntry ?: return
         val candle = candles.getOrNull(candleEntry.x.toInt()) ?: return
@@ -44,10 +48,10 @@ class CandleMarkerView(
             else -> neutralColor
         }
 
-        tvOpen.text  = "O  ${formatPrice(candle.open)}"
-        tvHigh.text  = "H  ${formatPrice(candle.high)}"
-        tvLow.text   = "L  ${formatPrice(candle.low)}"
-        tvClose.text = "C  ${formatPrice(candle.close)}"
+        tvOpen.text  = "${context.getString(R.string.open)}  ${PriceHelper.print(candle.open)}"
+        tvHigh.text  = "${context.getString(R.string.high)}  ${PriceHelper.print(candle.high)}"
+        tvLow.text   = "${context.getString(R.string.low)}  ${PriceHelper.print(candle.low)}"
+        tvClose.text = "${context.getString(R.string.close)}  ${PriceHelper.print(candle.close)}"
 
         tvOpen.setTextColor(labelColor)
         tvHigh.setTextColor(upColor)
@@ -59,9 +63,4 @@ class CandleMarkerView(
 
     // Posisi popup: di atas candle, tengah horizontal
     override fun getOffset(): MPPointF = MPPointF(-(width / 2f), -(height.toFloat() + 16f))
-
-    private fun formatPrice(value: Double): String {
-        return if (value >= 1_000) "%.2f".format(value)
-        else "%.4f".format(value)
-    }
 }

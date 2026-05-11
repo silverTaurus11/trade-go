@@ -4,4 +4,8 @@
     <string name="nav_home">Home</string>
     <string name="nav_watchlist">Watchlist</string>
     <string name="empty_watchlist">No watchlist items yet</string>
+    <string name="open">Open</string>
+    <string name="high">High</string>
+    <string name="close">Close</string>
+    <string name="low">Low</string>
 </resources>

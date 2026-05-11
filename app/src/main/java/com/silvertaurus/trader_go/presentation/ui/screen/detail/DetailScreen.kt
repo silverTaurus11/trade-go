@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.silvertaurus.trader_go.domain.utils.PriceHelper
 import com.silvertaurus.trader_go.presentation.navigation.Screen
 import com.silvertaurus.trader_go.presentation.state.UiState
 import com.silvertaurus.trader_go.presentation.ui.component.ChartView
@@ -63,7 +64,7 @@ fun DetailScreen(
     val isWatched = assetId in watchlistIds
 
     val priceText = remember(livePrice) {
-        livePrice?.let { "$${"%.2f".format(it)}" } ?: "-"
+        PriceHelper.print(livePrice)
     }
 
     val onToggleWatchList = remember(assetId) {

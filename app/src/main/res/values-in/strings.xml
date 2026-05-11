@@ -5,4 +5,8 @@
     <string name="nav_home">Beranda</string>
     <string name="nav_watchlist">Daftar Pantauan</string>
     <string name="empty_watchlist">Belum ada aset di daftar pantauan</string>
+    <string name="open">Buka</string>
+    <string name="high">Tertinggi</string>
+    <string name="close">Tutup</string>
+    <string name="low">Terendah</string>
 </resources>
