@@ -4,9 +4,11 @@ import android.graphics.Paint
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.components.AxisBase
@@ -49,15 +51,31 @@ fun ChartView(
     interval: CandleInterval = CandleInterval.ONE_HOUR,
     modifier: Modifier = Modifier
 ) {
-    // Ambil warna dari tema di composable scope — otomatis recompose saat mode berubah
-    val axisTextColor = MaterialTheme.colorScheme.onSurface.toArgb()
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).toArgb()
+    val context = LocalContext.current
+
+    // Warna dari tema — recompose otomatis saat dark/light berubah
+    val axisTextColor  = MaterialTheme.colorScheme.onSurface.toArgb()
+    val gridColor      = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).toArgb()
     val highlightColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val markerBgColor  = MaterialTheme.colorScheme.surface.toArgb()
+    val markerFgColor  = MaterialTheme.colorScheme.onSurface.toArgb()
+
+    // Buat marker sekali, update candles-nya di blok update
+    val marker = remember(markerBgColor, markerFgColor) {
+        CandleMarkerView(
+            context      = context,
+            bgColor      = markerBgColor,
+            labelColor   = markerFgColor,
+            upColor      = GreenUp.toArgb(),
+            downColor    = RedDown.toArgb(),
+            neutralColor = NeutralGray.toArgb(),
+        )
+    }
 
     AndroidView(
         modifier = modifier.fillMaxSize(),
-        factory = { context ->
-            CandleStickChart(context).apply {
+        factory = { ctx ->
+            CandleStickChart(ctx).apply {
                 description.isEnabled = false
                 legend.isEnabled = false
                 setBackgroundColor(Color.Transparent.toArgb())
@@ -78,17 +96,20 @@ fun ChartView(
                 }
 
                 axisRight.isEnabled = false
-
                 setTouchEnabled(true)
                 isHighlightPerDragEnabled = true
                 setDrawBorders(false)
             }
         },
         update = { chart ->
-            // Update warna di sini agar ikut perubahan dark/light mode
-            chart.xAxis.textColor = axisTextColor
+            // Update warna axis saat tema berubah
+            chart.xAxis.textColor   = axisTextColor
             chart.axisLeft.textColor = axisTextColor
             chart.axisLeft.gridColor = gridColor
+
+            // Pasang marker dan sync candles terbaru
+            marker.candles = candles
+            chart.marker = marker
 
             val entries = candles.mapIndexed { i, c ->
                 CandleEntry(
@@ -101,15 +122,15 @@ fun ChartView(
             }
 
             val set = CandleDataSet(entries, "").apply {
-                decreasingColor = RedDown.toArgb()
-                increasingColor = GreenUp.toArgb()
-                neutralColor = NeutralGray.toArgb()
-                decreasingPaintStyle = Paint.Style.FILL
-                increasingPaintStyle = Paint.Style.FILL
+                decreasingColor       = RedDown.toArgb()
+                increasingColor       = GreenUp.toArgb()
+                neutralColor          = NeutralGray.toArgb()
+                decreasingPaintStyle  = Paint.Style.FILL
+                increasingPaintStyle  = Paint.Style.FILL
                 shadowColorSameAsCandle = true
-                highLightColor = highlightColor
+                highLightColor        = highlightColor
                 setDrawValues(false)
-                barSpace = 0.2f
+                barSpace   = 0.2f
                 shadowWidth = 1.5f
             }
 
