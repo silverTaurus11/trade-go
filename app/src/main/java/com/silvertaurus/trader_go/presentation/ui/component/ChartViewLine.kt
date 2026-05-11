@@ -2,6 +2,7 @@ package com.silvertaurus.trader_go.presentation.ui.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -26,6 +27,11 @@ fun ChartViewLine(
 ) {
     val animatedPrices by animateFloatListAsState(prices)
 
+    val axisTextColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).toArgb()
+    val highlightColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val fillColor = GreenUp.copy(alpha = 0.15f).toArgb()
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -38,13 +44,13 @@ fun ChartViewLine(
 
                 xAxis.apply {
                     position = XAxis.XAxisPosition.BOTTOM
-                    textColor = Color.White.toArgb()
+                    textColor = axisTextColor
                     setDrawGridLines(false)
                 }
 
                 axisLeft.apply {
-                    textColor = Color.White.toArgb()
-                    gridColor = android.graphics.Color.DKGRAY
+                    textColor = axisTextColor
+                    this.gridColor = gridColor
                     setDrawGridLines(true)
                 }
 
@@ -52,6 +58,10 @@ fun ChartViewLine(
             }
         },
         update = { chart ->
+            chart.xAxis.textColor = axisTextColor
+            chart.axisLeft.textColor = axisTextColor
+            chart.axisLeft.gridColor = gridColor
+
             if (animatedPrices.isEmpty()) return@AndroidView
 
             val entries = animatedPrices.mapIndexed { index, price ->
@@ -64,15 +74,15 @@ fun ChartViewLine(
                 setDrawCircles(false)
                 setDrawValues(false)
                 setDrawFilled(true)
-                fillColor = Color(0xFF003300).toArgb()
-                fillAlpha = 200
+                this.fillColor = fillColor
+                fillAlpha = 255
                 mode = LineDataSet.Mode.CUBIC_BEZIER
-                highLightColor = android.graphics.Color.WHITE
+                highLightColor = highlightColor
             }
 
             chart.data = LineData(dataSet)
             chart.isAutoScaleMinMaxEnabled = true
-            chart.animateX(300) // smooth transition
+            chart.animateX(300)
             chart.invalidate()
         }
     )
@@ -92,4 +102,3 @@ fun animateFloatListAsState(targetValues: List<Double>): MutableState<List<Doubl
     }
     return state
 }
-

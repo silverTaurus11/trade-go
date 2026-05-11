@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.silvertaurus.trader_go.presentation.ui.theme.GreenUp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -98,7 +99,7 @@ fun DetailScreen(
             livePrice?.let {
                 Text(
                     text = priceText,
-                    color = Color(0xFF00E676),
+                    color = GreenUp,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                 )

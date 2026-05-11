@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,21 +28,25 @@ fun TimeRangeSelector(
     onSelected: (CandleInterval) -> Unit
 ) {
     val transition = updateTransition(selected, label = "rangeTransition")
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary   // hitam → kontras di atas hijau
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface   // putih/hitam sesuai mode
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF1E1E1E), RoundedCornerShape(8.dp))
+            .background(surfaceColor, RoundedCornerShape(8.dp))
             .padding(4.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         CandleInterval.entries.forEach { interval ->
 
             val bg by transition.animateColor(label = "bgColor") {
-                if (it == interval) Color(0xFF00E676) else Color.Transparent
+                if (it == interval) primaryColor else Color.Transparent
             }
             val textColor by transition.animateColor(label = "textColor") {
-                if (it == interval) Color.Black else Color.White
+                if (it == interval) onPrimaryColor else onSurfaceColor
             }
 
             Box(

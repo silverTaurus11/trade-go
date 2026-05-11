@@ -1,5 +1,6 @@
 package com.silvertaurus.trader_go.presentation.ui.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,6 +22,10 @@ fun ChartViewBar(
     candles: List<Candle>,
     modifier: Modifier = Modifier
 ) {
+    val axisTextColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).toArgb()
+    val highlightColor = MaterialTheme.colorScheme.onSurface.toArgb()
+
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -33,14 +38,14 @@ fun ChartViewBar(
 
                 xAxis.apply {
                     position = XAxis.XAxisPosition.BOTTOM
-                    textColor = Color.White.toArgb()
+                    textColor = axisTextColor
                     setDrawGridLines(false)
                     setDrawLabels(false)
                 }
 
                 axisLeft.apply {
-                    textColor = Color.White.toArgb()
-                    gridColor = android.graphics.Color.DKGRAY
+                    textColor = axisTextColor
+                    this.gridColor = gridColor
                     setDrawGridLines(true)
                 }
 
@@ -49,6 +54,10 @@ fun ChartViewBar(
             }
         },
         update = { chart ->
+            chart.xAxis.textColor = axisTextColor
+            chart.axisLeft.textColor = axisTextColor
+            chart.axisLeft.gridColor = gridColor
+
             if (candles.isEmpty()) return@AndroidView
 
             val entries = candles.mapIndexed { index, candle ->
@@ -66,7 +75,7 @@ fun ChartViewBar(
             val dataSet = BarDataSet(entries, "Price").apply {
                 setColors(colors)
                 setDrawValues(false)
-                highLightColor = android.graphics.Color.WHITE
+                highLightColor = highlightColor
             }
 
             chart.data = BarData(dataSet)

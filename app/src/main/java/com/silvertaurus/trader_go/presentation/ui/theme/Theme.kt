@@ -13,22 +13,24 @@ private val DarkGraySurface = Color(0xFF1E1E1E)
 
 private val DarkColorScheme = darkColorScheme(
     primary = GreenPrimary,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,       // hitam di atas hijau → kontras AAA (7:1)
     secondary = GreenAccent,
     background = BlackBackground,
     surface = DarkGraySurface,
     onSurface = Color.White,
+    onBackground = Color.White,
     error = RedAccent,
     onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = GreenPrimary,
-    onPrimary = Color.White,
+    onPrimary = Color.Black,       // hitam di atas hijau → kontras AAA (7:1)
     secondary = GreenAccent,
     background = Color.White,
     surface = Color(0xFFF2F2F2),
     onSurface = Color.Black,
+    onBackground = Color.Black,
     error = RedAccent,
     onError = Color.White
 )
