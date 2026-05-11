@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.silvertaurus.trader_go.presentation.navigation.Screen
 import com.silvertaurus.trader_go.presentation.state.UiState
-import com.silvertaurus.trader_go.presentation.ui.component.ChartViewLine
+import com.silvertaurus.trader_go.presentation.ui.component.ChartViewBar
 import com.silvertaurus.trader_go.presentation.ui.component.ErrorView
 import com.silvertaurus.trader_go.presentation.ui.component.LoadingView
 import com.silvertaurus.trader_go.presentation.ui.component.TimeRangeSelector
@@ -124,12 +124,8 @@ fun DetailScreen(
                 when (ui) {
                     is UiState.Loading -> LoadingView()
                     is UiState.Success -> {
-                        val prices = remember(ui.data) {
-                            ui.data.map { it.close }
-                        }
-
-                        ChartViewLine(
-                            prices = prices,
+                        ChartViewBar(
+                            candles = ui.data,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(300.dp)
